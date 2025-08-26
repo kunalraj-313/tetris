@@ -1,11 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Cell from "./Cell";
-import type {
-  TetrisBlock,
-  GridSize,
-  Position,
-  CurrentBlock,
-} from "../types/tetris";
+import type { TetrisBlock, GridSize, Position } from "../types/tetris";
 
 function GameContainer() {
   const gridSize: GridSize = {
@@ -14,8 +9,11 @@ function GameContainer() {
   };
 
   const [isRunning, setIsRunning] = useState<boolean>(true);
-  const [currentBlock, setCurrentBlock] = useState<CurrentBlock>(null);
+  const [currentBlock, setCurrentBlock] = useState<
+    TetrisBlock | Record<string, never>
+  >({});
   const [dormantBlocks, setDormantBlocks] = useState<TetrisBlock[]>([]);
+  const [elapsedTime, setElapsedTime] = useState<number>(0);
   const intervalIdRef = useRef<number | null>(null);
 
   const tetrisEntityTypes: TetrisBlock[] = useMemo(
@@ -106,7 +104,7 @@ function GameContainer() {
   }, [dormantBlocks]);
 
   const isCollided: boolean = useMemo(() => {
-    if (!currentBlock) return false;
+    if (!("shape" in currentBlock) || !currentBlock.shape) return false;
     const collision = currentBlock.shape.some((block) => {
       return collisionLayer.find(
         (pos) => block.x + 1 === pos.x && block.y + 1 === pos.y
@@ -124,21 +122,37 @@ function GameContainer() {
     );
   }, [tetrisEntityTypes]);
 
+  const handleStart = useCallback(() => {
+    setIsRunning(true);
+  }, []);
+
+  const handleStop = useCallback(() => {
+    setIsRunning(false);
+  }, []);
+
+  const handleReset = useCallback(() => {
+    setIsRunning(false);
+    setElapsedTime(0);
+  }, []);
+
   const initGame = useCallback(() => {
-    if (!currentBlock) {
+    if (!("shape" in currentBlock) || !currentBlock.shape) {
       generateNewBlock();
       return;
     }
     intervalIdRef.current = setInterval(() => {
+      setElapsedTime((prevTime) => prevTime + 1);
       setCurrentBlock((prev) => {
-        if (!prev) return prev;
+        if (!("shape" in prev) || !prev.shape) return prev;
 
         return {
           ...prev,
-          shape: prev.shape.map((pos) => ({
-            x: pos.x,
-            y: pos.y + 1,
-          })),
+          shape: prev.shape.map((pos) => {
+            return {
+              x: pos.x,
+              y: pos.y + 1,
+            };
+          }),
         };
       });
     }, 200);
@@ -157,9 +171,9 @@ function GameContainer() {
   }, [initGame, isRunning]);
 
   useEffect(() => {
-    if (isCollided && currentBlock) {
-      setDormantBlocks((prev) => [...prev, currentBlock]);
-      setCurrentBlock(null);
+    if (isCollided) {
+      setDormantBlocks((prev) => [...prev, currentBlock as TetrisBlock]);
+      setCurrentBlock({});
       generateNewBlock();
     }
   }, [currentBlock, generateNewBlock, isCollided]);

@@ -1,12 +1,13 @@
 import React, { useMemo } from "react";
+import type { CellProps } from "../types/tetris";
 
-export default function Cell({ pos, currentBlock, dormantBlocks }) {
+export default function Cell({ pos, currentBlock, dormantBlocks }: CellProps) {
   const isActive = useMemo(() => {
-    if (!currentBlock.shape) return false;
+    if (!currentBlock) return false;
     return currentBlock.shape.some(
       (blockPos) => blockPos.x === pos.x && blockPos.y === pos.y
     );
-  }, [currentBlock.shape, pos.x, pos.y]);
+  }, [currentBlock, pos.x, pos.y]);
 
   const isDormant = useMemo(
     () =>
@@ -31,7 +32,7 @@ export default function Cell({ pos, currentBlock, dormantBlocks }) {
     <div
       style={{
         backgroundColor: isActive
-          ? currentBlock.color
+          ? currentBlock?.color || "transparent"
           : isDormant
           ? dormantColour
           : "transparent",
