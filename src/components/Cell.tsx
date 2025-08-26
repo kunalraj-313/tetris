@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 
 export default function Cell({ pos, currentBlock }) {
   const isActive = useMemo(() => {
+    if (!currentBlock.shape) return false;
     return currentBlock.shape.some(
       (blockPos) => blockPos.x === pos.x && blockPos.y === pos.y
     );
