@@ -166,6 +166,93 @@ function GameContainer() {
     }
   }, [currentBlock, generateNewBlock, isCollided]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!currentBlock) return;
+      if (e.key === "ArrowLeft") {
+        setCurrentBlock((prev) => {
+          if (!prev) return prev;
+          const movedBlock = {
+            ...prev,
+            shape: prev.shape.map((pos) => ({
+              x: pos.x - 1,
+              y: pos.y,
+            })),
+          };
+          const isOutOfBounds = movedBlock.shape.some(
+            (pos) => pos.x < 0 || pos.x >= gridSize.x
+          );
+          const isColliding = movedBlock.shape.some((block) =>
+            collisionLayer.find((pos) => block.x === pos.x && block.y === pos.y)
+          );
+          if (isOutOfBounds || isColliding) {
+            return prev;
+          }
+          return movedBlock;
+        });
+      } else if (e.key === "ArrowRight") {
+        setCurrentBlock((prev) => {
+          if (!prev) return prev;
+          const movedBlock = {
+            ...prev,
+            shape: prev.shape.map((pos) => ({
+              x: pos.x + 1,
+              y: pos.y,
+            })),
+          };
+          const isOutOfBounds = movedBlock.shape.some(
+            (pos) => pos.x < 0 || pos.x >= gridSize.x
+          );
+          const isColliding = movedBlock.shape.some((block) =>
+            collisionLayer.find((pos) => block.x === pos.x && block.y === pos.y)
+          );
+          if (isOutOfBounds || isColliding) {
+            return prev;
+          }
+          return movedBlock;
+        });
+      } else if (e.key === "ArrowDown") {
+        setCurrentBlock((prev) => {
+          if (!prev) return prev;
+          const movedBlock = {
+            ...prev,
+            shape: prev.shape.map((pos) => ({
+              x: pos.x,
+              y: pos.y + 1,
+            })),
+          };
+          const isOutOfBounds = movedBlock.shape.some(
+            (pos) => pos.y >= gridSize.y
+          );
+          const isColliding = movedBlock.shape.some((block) =>
+            collisionLayer.find((pos) => block.x === pos.x && block.y === pos.y)
+          );
+          if (isOutOfBounds || isColliding) {
+            return prev;
+          }
+          return movedBlock;
+        });
+      } else if (e.key === " ") {
+        return;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [currentBlock, collisionLayer, gridSize.x, gridSize.y]);
+
+  useEffect(() => {
+    if (dormantBlocks.some((block) => block.shape.some((pos) => pos.y < 0))) {
+      alert("Game Over");
+      setIsRunning(false);
+      setCurrentBlock(null);
+      setDormantBlocks([]);
+    }
+  }, [dormantBlocks]);
+
   return (
     <div className="border border-white p-4 margin-0-auto w-fit h-fit">
       {Array.from({ length: gridSize.y }).map((_, rowIndex) => (

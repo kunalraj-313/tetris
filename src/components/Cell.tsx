@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import type { CellProps } from "../types/tetris";
 
 export default function Cell({ pos, currentBlock, dormantBlocks }: CellProps) {
@@ -37,7 +37,7 @@ export default function Cell({ pos, currentBlock, dormantBlocks }: CellProps) {
           ? dormantColour
           : "transparent",
       }}
-      className="w-[50px] h-[50px] text-xs"
-    >{`(${pos.x}, ${pos.y})`}</div>
+      className="w-[30px] h-[30px] text-xs"
+    ></div>
   );
 }
