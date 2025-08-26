@@ -109,10 +109,12 @@ function GameContainer() {
     if (!currentBlock) return false;
     const collision = currentBlock.shape.some((block) => {
       return collisionLayer.find(
-        (pos) => block.x + 1 === pos.x && block.y + 1 === pos.y
+        (pos) => block.x === pos.x && block.y + 1 === pos.y
       );
     });
-    if (currentBlock.shape.some((pos) => pos.y >= gridSize.y || collision)) {
+    if (
+      currentBlock.shape.some((pos) => pos.y >= gridSize.y - 1 || collision)
+    ) {
       return true;
     }
     return false;
