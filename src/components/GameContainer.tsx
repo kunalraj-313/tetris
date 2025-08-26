@@ -129,14 +129,14 @@ function GameContainer() {
   );
 
   const collisionLayer = useMemo(() => {
-    return [];
-  }, []);
+    return dormantBlocks.flatMap((block) => block.shape);
+  }, [dormantBlocks]);
 
   const isCollided = useMemo(() => {
     if (!currentBlock.shape) return false;
     const collision = currentBlock.shape.some((block) => {
       return collisionLayer.find(
-        (pos) => block.x === pos.x && block.y === pos.y
+        (pos) => block.x + 1 === pos.x && block.y + 1 === pos.y
       );
     });
     if (currentBlock.shape.some((pos) => pos.y >= gridSize.y || collision)) {
@@ -183,7 +183,7 @@ function GameContainer() {
           }),
         };
       });
-    }, 1000);
+    }, 200);
   }, [currentBlock.shape, generateNewBlock]);
 
   useEffect(() => {
@@ -213,6 +213,7 @@ function GameContainer() {
           {Array.from({ length: gridSize.x }).map((_, colIndex) => (
             <Cell
               key={colIndex}
+              dormantBlocks={dormantBlocks}
               currentBlock={currentBlock}
               pos={{
                 x: colIndex,
