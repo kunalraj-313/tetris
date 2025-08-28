@@ -627,43 +627,62 @@ function GameContainer() {
   }, [dormantBlocks, handleGameOver, isGameOverProcessing]);
 
   return (
-    <div className="flex gap-8">
-      <ScoresTable refreshTrigger={refreshScores} />
-      <div className="border border-white margin-0-auto w-fit h-fit">
-        {Array.from({ length: gridSize.y }).map((_, rowIndex) => (
-          <div key={rowIndex} className="flex">
-            {Array.from({ length: gridSize.x }).map((_, colIndex) => (
-              <Cell
-                key={colIndex}
-                dormantBlocks={dormantBlocks}
-                currentBlock={currentBlock}
-                showGrids={showGrids}
-                pos={{
-                  x: colIndex,
-                  y: rowIndex,
-                }}
-              />
-            ))}
+    <>
+      <div className="lg:hidden flex items-center justify-center min-h-screen bg-black text-white p-8">
+        <div className="text-center border border-white bg-transparent p-8 rounded-lg">
+          <div className="text-6xl mb-4">📱</div>
+          <h1 className="text-2xl font-bold mb-4 font-mono">TETRIS</h1>
+          <h2 className="text-xl mb-6 font-mono">Coming Soon for Mobile!</h2>
+          <p className="text-gray-300 mb-4 font-mono">
+            This game is currently optimized for desktop and tablet devices.
+          </p>
+          <p className="text-gray-300 font-mono">
+            Please visit us on a larger screen to play.
+          </p>
+          <div className="mt-8 text-sm text-gray-400 font-mono">
+            Minimum resolution: 1024px width
           </div>
-        ))}
+        </div>
       </div>
-      <GameSettings
-        isRunning={isRunning}
-        score={score}
-        elapsedTime={elapsedTime}
-        delay={delay}
-        isMuted={isMuted}
-        volume={volume}
-        showGrids={showGrids}
-        onStart={handleStart}
-        onReset={handleReset}
-        onQuit={handleQuit}
-        onDelayChange={handleDelayChange}
-        onToggleMute={toggleMute}
-        onVolumeChange={handleVolumeChange}
-        onToggleGrids={toggleGrids}
-      />
-    </div>
+
+      <div className="hidden lg:flex gap-8">
+        <ScoresTable refreshTrigger={refreshScores} />
+        <div className="border border-white margin-0-auto w-fit h-fit">
+          {Array.from({ length: gridSize.y }).map((_, rowIndex) => (
+            <div key={rowIndex} className="flex">
+              {Array.from({ length: gridSize.x }).map((_, colIndex) => (
+                <Cell
+                  key={colIndex}
+                  dormantBlocks={dormantBlocks}
+                  currentBlock={currentBlock}
+                  showGrids={showGrids}
+                  pos={{
+                    x: colIndex,
+                    y: rowIndex,
+                  }}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+        <GameSettings
+          isRunning={isRunning}
+          score={score}
+          elapsedTime={elapsedTime}
+          delay={delay}
+          isMuted={isMuted}
+          volume={volume}
+          showGrids={showGrids}
+          onStart={handleStart}
+          onReset={handleReset}
+          onQuit={handleQuit}
+          onDelayChange={handleDelayChange}
+          onToggleMute={toggleMute}
+          onVolumeChange={handleVolumeChange}
+          onToggleGrids={toggleGrids}
+        />
+      </div>
+    </>
   );
 }
 
