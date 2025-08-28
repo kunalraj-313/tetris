@@ -182,48 +182,8 @@ function GameContainer() {
     [isRunning]
   );
 
-  useEffect(() => {
-    if (isRunning) {
-      timerIdRef.current = setInterval(() => {
-        setElapsedTime((prev) => prev + 1);
-      }, 1000);
-    } else {
-      if (timerIdRef.current) {
-        clearInterval(timerIdRef.current);
-        timerIdRef.current = null;
-      }
-    }
-
-    return () => {
-      if (timerIdRef.current) {
-        clearInterval(timerIdRef.current);
-      }
-    };
-  }, [isRunning]);
-
-  useEffect(() => {
-    if (isRunning) {
-      initGame();
-    }
-
-    return () => {
-      if (intervalIdRef.current !== null) {
-        clearInterval(intervalIdRef.current);
-      }
-    };
-  }, [initGame, isRunning]);
-
-  useEffect(() => {
-    if (isCollided && currentBlock) {
-      setDormantBlocks((prev) => [...prev, currentBlock]);
-      setCurrentBlock(null);
-      generateNewBlock();
-      setScore((prev) => prev + 10);
-    }
-  }, [currentBlock, generateNewBlock, isCollided]);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
       if (!currentBlock) return;
       if (e.key === "ArrowLeft") {
         setCurrentBlock((prev) => {
@@ -291,14 +251,67 @@ function GameContainer() {
       } else if (e.key === " ") {
         return;
       }
-    };
+    },
+    [currentBlock, collisionLayer, gridSize.x, gridSize.y]
+  );
 
+  useEffect(() => {
+    if (isRunning) {
+      timerIdRef.current = setInterval(() => {
+        setElapsedTime((prev) => prev + 1);
+      }, 1000);
+    } else {
+      if (timerIdRef.current) {
+        clearInterval(timerIdRef.current);
+        timerIdRef.current = null;
+      }
+    }
+
+    return () => {
+      if (timerIdRef.current) {
+        clearInterval(timerIdRef.current);
+      }
+    };
+  }, [isRunning]);
+
+  useEffect(() => {
+    if (isRunning) {
+      initGame();
+    }
+
+    return () => {
+      if (intervalIdRef.current !== null) {
+        clearInterval(intervalIdRef.current);
+      }
+    };
+  }, [initGame, isRunning]);
+
+  useEffect(() => {
+    if (isCollided && currentBlock) {
+      setDormantBlocks((prev) => [...prev, currentBlock]);
+      setCurrentBlock(null);
+      generateNewBlock();
+      setScore((prev) => prev + 10);
+    }
+  }, [currentBlock, generateNewBlock, isCollided]);
+
+  useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [currentBlock, collisionLayer, gridSize.x, gridSize.y]);
+  }, [currentBlock, collisionLayer, gridSize.x, gridSize.y, handleKeyDown]);
+
+  // useEffect(() => {
+  //   for (const key in keysHeld) {
+  //     if (keysHeld[key]) {
+  //       setInterval(() => {
+  //         handleKeyDown(new KeyboardEvent("keydown", { key }));
+  //       }, 50);
+  //     }
+  //   }
+  // }, [handleKeyDown, keysHeld]);
 
   useEffect(() => {
     if (dormantBlocks.some((block) => block.shape.some((pos) => pos.y < 0))) {
