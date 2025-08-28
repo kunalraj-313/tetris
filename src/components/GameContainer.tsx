@@ -6,6 +6,7 @@ import type {
   GridSize,
   Position,
   CurrentBlock,
+  Orientation,
 } from "../types/tetris";
 
 function GameContainer() {
@@ -284,7 +285,7 @@ function GameContainer() {
 
           const rotatedBlock = {
             ...prev,
-            orientation: newOrientation,
+            orientation: newOrientation as Orientation,
             shape: rotatedShape,
           };
 
