@@ -262,8 +262,29 @@ function GameContainer() {
             }
           });
 
+          let newOrientation = "";
+
+          switch (prev.orientation) {
+            case "N":
+              newOrientation = "E";
+              break;
+            case "E":
+              newOrientation = "S";
+              break;
+            case "S":
+              newOrientation = "W";
+              break;
+            case "W":
+              newOrientation = "N";
+              break;
+            default:
+              newOrientation = prev.orientation;
+              break;
+          }
+
           const rotatedBlock = {
             ...prev,
+            orientation: newOrientation,
             shape: rotatedShape,
           };
 
