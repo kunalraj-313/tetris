@@ -153,7 +153,7 @@ function GameContainer() {
   }, [nextBlock, tetrisEntityTypes]);
 
   const getDelay = useCallback(() => {
-    return Math.max(500 - (level - 1) * 50, 50);
+    return Math.max(500 - (level - 1) * 50, 100);
   }, [level]);
 
   const initGame = useCallback(() => {
@@ -610,7 +610,7 @@ function GameContainer() {
 
   useEffect(() => {
     clearCompletedLines();
-    setLevel(Math.min(Math.floor(score / 100) + 1, 10));
+    setLevel(Math.min(Math.floor(score / 500) + 1, 10));
   }, [dormantBlocks, clearCompletedLines, score]);
 
   useEffect(() => {
