@@ -429,6 +429,8 @@ function GameContainer() {
           const isColliding = movedBlock.shape.some((block) =>
             collisionLayer.find((pos) => block.x === pos.x && block.y === pos.y)
           );
+
+          //need to add logic to allow last minute strafe :'()
           if (isOutOfBounds || isColliding) {
             return prev;
           }
