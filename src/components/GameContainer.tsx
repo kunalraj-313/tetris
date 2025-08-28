@@ -31,7 +31,7 @@ function GameContainer() {
         orientation: "N",
         shape: [
           { x: 4, y: -1 },
-          { x: 4, y: -2 },
+          { x: 4, y: -2, pivotPoint: true },
           { x: 4, y: -3 },
           { x: 4, y: -4 },
         ],
@@ -54,7 +54,7 @@ function GameContainer() {
         shape: [
           { x: 4, y: -2 },
           { x: 5, y: -3 },
-          { x: 5, y: -2 },
+          { x: 5, y: -2, pivotPoint: true },
           { x: 5, y: -1 },
         ],
       },
@@ -64,7 +64,7 @@ function GameContainer() {
         orientation: "N",
         shape: [
           { x: 4, y: -3 },
-          { x: 4, y: -2 },
+          { x: 4, y: -2, pivotPoint: true },
           { x: 5, y: -2 },
           { x: 5, y: -1 },
         ],
@@ -75,7 +75,7 @@ function GameContainer() {
         orientation: "N",
         shape: [
           { x: 5, y: -3 },
-          { x: 5, y: -2 },
+          { x: 5, y: -2, pivotPoint: true },
           { x: 4, y: -2 },
           { x: 4, y: -1 },
         ],
@@ -86,7 +86,7 @@ function GameContainer() {
         orientation: "N",
         shape: [
           { x: 4, y: -1 },
-          { x: 4, y: -2 },
+          { x: 4, y: -2, pivotPoint: true },
           { x: 4, y: -3 },
           { x: 5, y: -3 },
         ],
@@ -97,7 +97,7 @@ function GameContainer() {
         orientation: "N",
         shape: [
           { x: 5, y: -1 },
-          { x: 5, y: -2 },
+          { x: 5, y: -2, pivotPoint: true },
           { x: 5, y: -3 },
           { x: 4, y: -3 },
         ],
@@ -145,6 +145,7 @@ function GameContainer() {
           shape: prev.shape.map((pos) => ({
             x: pos.x,
             y: pos.y + 1,
+            pivotPoint: pos.pivotPoint,
           })),
         };
       });
@@ -171,6 +172,17 @@ function GameContainer() {
     }
   }, []);
 
+  const getRotatedCoordinates = useCallback(
+    (block: Position, pivotPoint: Position) => {
+      const dx = block.x - pivotPoint.x;
+      const dy = block.y - pivotPoint.y;
+      const newX = pivotPoint.x - dy;
+      const newY = pivotPoint.y + dx;
+      return { x: newX, y: newY };
+    },
+    []
+  );
+
   const handleDelayChange = useCallback(
     (newDelay: number) => {
       setDelay(newDelay);
@@ -193,6 +205,7 @@ function GameContainer() {
             shape: prev.shape.map((pos) => ({
               x: pos.x - 1,
               y: pos.y,
+              pivotPoint: pos.pivotPoint,
             })),
           };
           const isOutOfBounds = movedBlock.shape.some(
@@ -214,6 +227,7 @@ function GameContainer() {
             shape: prev.shape.map((pos) => ({
               x: pos.x + 1,
               y: pos.y,
+              pivotPoint: pos.pivotPoint,
             })),
           };
           const isOutOfBounds = movedBlock.shape.some(
@@ -227,6 +241,44 @@ function GameContainer() {
           }
           return movedBlock;
         });
+      } else if (e.key === "ArrowUp") {
+        setCurrentBlock((prev) => {
+          if (!prev) return prev;
+
+          if (prev.name === "O") return prev;
+
+          const pivotPoint = prev.shape.find((pos) => pos.pivotPoint);
+          if (!pivotPoint) return prev;
+
+          const rotatedShape = prev.shape.map((block) => {
+            if (block.pivotPoint) {
+              return { ...block };
+            } else {
+              const rotated = getRotatedCoordinates(block, pivotPoint);
+              return {
+                x: rotated.x,
+                y: rotated.y,
+              };
+            }
+          });
+
+          const rotatedBlock = {
+            ...prev,
+            shape: rotatedShape,
+          };
+
+          const isOutOfBounds = rotatedBlock.shape.some(
+            (pos) => pos.x < 0 || pos.x >= gridSize.x || pos.y >= gridSize.y
+          );
+          const isColliding = rotatedBlock.shape.some((block) =>
+            collisionLayer.find((pos) => block.x === pos.x && block.y === pos.y)
+          );
+
+          if (isOutOfBounds || isColliding) {
+            return prev;
+          }
+          return rotatedBlock;
+        });
       } else if (e.key === "ArrowDown") {
         setCurrentBlock((prev) => {
           if (!prev) return prev;
@@ -235,6 +287,7 @@ function GameContainer() {
             shape: prev.shape.map((pos) => ({
               x: pos.x,
               y: pos.y + 1,
+              pivotPoint: pos.pivotPoint,
             })),
           };
           const isOutOfBounds = movedBlock.shape.some(
@@ -252,7 +305,13 @@ function GameContainer() {
         return;
       }
     },
-    [currentBlock, collisionLayer, gridSize.x, gridSize.y]
+    [
+      currentBlock,
+      gridSize.x,
+      gridSize.y,
+      collisionLayer,
+      getRotatedCoordinates,
+    ]
   );
 
   useEffect(() => {

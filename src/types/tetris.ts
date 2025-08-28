@@ -1,6 +1,7 @@
 export interface Position {
   x: number;
   y: number;
+  pivotPoint?: boolean;
 }
 
 export interface GridSize {
