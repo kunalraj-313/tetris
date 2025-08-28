@@ -3,9 +3,13 @@ interface GameSettingsProps {
   score: number;
   elapsedTime: number;
   delay: number;
+  isMuted: boolean;
+  volume: number;
   onStart: () => void;
   onReset: () => void;
   onDelayChange: (delay: number) => void;
+  onToggleMute: () => void;
+  onVolumeChange: (volume: number) => void;
 }
 
 export default function GameSettings({
@@ -13,9 +17,13 @@ export default function GameSettings({
   score,
   elapsedTime,
   delay,
+  isMuted,
+  volume,
   onStart,
   onReset,
   onDelayChange,
+  onToggleMute,
+  onVolumeChange,
 }: GameSettingsProps) {
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -70,6 +78,32 @@ export default function GameSettings({
           />
         </div>
         <div className="text-xs text-gray-300">Lower delay = Faster blocks</div>
+      </div>
+
+      <div className="border border-white bg-transparent p-3">
+        <h3 className="text-lg font-bold mb-3">AUDIO</h3>
+        <div className="space-y-3">
+          <button
+            onClick={onToggleMute}
+            className="w-full border border-white bg-transparent text-white px-4 py-2 hover:bg-white hover:text-black transition-colors"
+          >
+            {isMuted ? "🔇 UNMUTE" : "🔊 MUTE"}
+          </button>
+          <div>
+            <label className="block text-sm mb-1">
+              Volume: {Math.round(volume * 100)}%
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.1"
+              value={volume}
+              onChange={(e) => onVolumeChange(Number(e.target.value))}
+              className="w-full bg-transparent border border-white accent-white"
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

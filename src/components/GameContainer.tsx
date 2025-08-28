@@ -28,8 +28,11 @@ function GameContainer() {
   const [refreshScores, setRefreshScores] = useState<number>(0);
   const [isGameOverProcessing, setIsGameOverProcessing] =
     useState<boolean>(false);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
+  const [volume, setVolume] = useState<number>(0.5);
   const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
   const timerIdRef = useRef<NodeJS.Timeout | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const tetrisEntityTypes: TetrisBlock[] = useMemo(
     () => [
@@ -178,6 +181,44 @@ function GameContainer() {
     if (timerIdRef.current) {
       clearInterval(timerIdRef.current);
       timerIdRef.current = null;
+    }
+  }, []);
+
+  // Audio control functions
+  const initAudio = useCallback(() => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio("/audio/tony-ferguson-theme.mp3");
+      audioRef.current.loop = true;
+      audioRef.current.volume = 0.5; // Set initial volume to 50%
+    }
+  }, []); // Remove volume dependency to prevent recreation
+
+  const toggleMute = useCallback(() => {
+    setIsMuted((prev) => {
+      const newMuted = !prev;
+      if (audioRef.current) {
+        audioRef.current.muted = newMuted;
+      }
+      return newMuted;
+    });
+  }, []);
+
+  const handleVolumeChange = useCallback((newVolume: number) => {
+    setVolume(newVolume);
+    if (audioRef.current) {
+      audioRef.current.volume = newVolume;
+    }
+  }, []);
+
+  const playMusic = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.play().catch(console.error);
+    }
+  }, []);
+
+  const pauseMusic = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
     }
   }, []);
 
@@ -411,6 +452,33 @@ function GameContainer() {
     };
   }, [isRunning]);
 
+  // Initialize audio on component mount
+  useEffect(() => {
+    initAudio();
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, [initAudio]);
+
+  // Update audio volume when volume state changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
+
+  // Control music based on game state
+  useEffect(() => {
+    if (isRunning) {
+      playMusic();
+    } else {
+      pauseMusic();
+    }
+  }, [isRunning, playMusic, pauseMusic]);
+
   useEffect(() => {
     if (isRunning) {
       initGame();
@@ -484,9 +552,13 @@ function GameContainer() {
         score={score}
         elapsedTime={elapsedTime}
         delay={delay}
+        isMuted={isMuted}
+        volume={volume}
         onStart={handleStart}
         onReset={handleReset}
         onDelayChange={handleDelayChange}
+        onToggleMute={toggleMute}
+        onVolumeChange={handleVolumeChange}
       />
     </div>
   );
