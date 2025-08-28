@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Cell from "./Cell";
 import GameSettings from "./GameSettings";
 import ScoresTable from "./ScoresTable";
+import NextBlock from "./NextBlock";
 import { useSupabase } from "../hooks/useSupabase";
 import type {
   TetrisBlock,
@@ -21,6 +22,7 @@ function GameContainer() {
 
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [currentBlock, setCurrentBlock] = useState<CurrentBlock>(null);
+  const [nextBlock, setNextBlock] = useState<CurrentBlock>(null);
   const [dormantBlocks, setDormantBlocks] = useState<TetrisBlock[]>([]);
   const [score, setScore] = useState<number>(0);
   const [elapsedTime, setElapsedTime] = useState<number>(0);
@@ -138,10 +140,17 @@ function GameContainer() {
   }, [collisionLayer, currentBlock, gridSize.y]);
 
   const generateNewBlock = useCallback(() => {
-    setCurrentBlock(
-      tetrisEntityTypes[Math.floor(Math.random() * tetrisEntityTypes.length)]
-    );
-  }, [tetrisEntityTypes]);
+    if (nextBlock) {
+      setCurrentBlock(nextBlock);
+      setNextBlock(
+        tetrisEntityTypes[Math.floor(Math.random() * tetrisEntityTypes.length)]
+      );
+    } else {
+      setNextBlock(
+        tetrisEntityTypes[Math.floor(Math.random() * tetrisEntityTypes.length)]
+      );
+    }
+  }, [nextBlock, tetrisEntityTypes]);
 
   const initGame = useCallback(() => {
     if (!currentBlock) {
@@ -171,6 +180,7 @@ function GameContainer() {
   const handleReset = useCallback(() => {
     setIsRunning(false);
     setCurrentBlock(null);
+    setNextBlock(null);
     setDormantBlocks([]);
     setScore(0);
     setElapsedTime(0);
@@ -186,7 +196,7 @@ function GameContainer() {
   }, []);
 
   const handleQuit = useCallback(async () => {
-    if (score === 0) return; // Don't save if no score
+    if (score === 0) return;
 
     setIsRunning(false);
     setCurrentBlock(null);
@@ -225,6 +235,7 @@ function GameContainer() {
     setDormantBlocks([]);
     setScore(0);
     setElapsedTime(0);
+    setNextBlock(null);
     setIsGameOverProcessing(false);
   }, [saveScore, score, elapsedTime]);
 
@@ -376,6 +387,7 @@ function GameContainer() {
     setDormantBlocks([]);
     setScore(0);
     setElapsedTime(0);
+    setNextBlock(null);
     setIsGameOverProcessing(false);
   }, [saveScore, score, elapsedTime, isGameOverProcessing]);
 
@@ -393,6 +405,13 @@ function GameContainer() {
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (!currentBlock) return;
+
+      if (
+        ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", " "].includes(e.key)
+      ) {
+        e.preventDefault();
+      }
+
       if (e.key === "ArrowLeft") {
         setCurrentBlock((prev) => {
           if (!prev) return prev;
@@ -646,7 +665,10 @@ function GameContainer() {
       </div>
 
       <div className="hidden lg:flex gap-8">
-        <ScoresTable refreshTrigger={refreshScores} />
+        <div className="flex flex-col">
+          <NextBlock nextBlock={nextBlock} />
+          <ScoresTable refreshTrigger={refreshScores} />
+        </div>
         <div className="border border-white margin-0-auto w-fit h-fit">
           {Array.from({ length: gridSize.y }).map((_, rowIndex) => (
             <div key={rowIndex} className="flex">
