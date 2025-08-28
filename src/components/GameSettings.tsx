@@ -79,7 +79,7 @@ export default function GameSettings({
           <h3 className="text-lg font-bold mb-2">LEVEL</h3>
           <div className="text-2xl font-bold">{level}</div>
           <div className="text-xs text-gray-300">
-            Speed increases every 100 points
+            Speed increases every 500 points
           </div>
         </div>
 
