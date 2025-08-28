@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Cell from "./Cell";
 import GameSettings from "./GameSettings";
+import ScoresTable from "./ScoresTable";
 import { useSupabase } from "../hooks/useSupabase";
 import type {
   TetrisBlock,
@@ -24,6 +25,7 @@ function GameContainer() {
   const [score, setScore] = useState<number>(0);
   const [elapsedTime, setElapsedTime] = useState<number>(0);
   const [delay, setDelay] = useState<number>(500);
+  const [refreshScores, setRefreshScores] = useState<number>(0);
   const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
   const timerIdRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -191,13 +193,11 @@ function GameContainer() {
     setIsRunning(false);
     setCurrentBlock(null);
 
-    // Prompt for player name
     const playerName = prompt(
       "Game Over! Enter your name for the leaderboard:"
     );
 
     if (playerName && playerName.trim()) {
-      // Save score to Supabase
       const result = await saveScore({
         name: playerName.trim(),
         score: score,
@@ -210,6 +210,7 @@ function GameContainer() {
             elapsedTime / 60
           )}:${(elapsedTime % 60).toString().padStart(2, "0")}`
         );
+        setRefreshScores((prev) => prev + 1);
       } else {
         alert(
           `Game Over! Final Score: ${score}, Time: ${Math.floor(
@@ -227,7 +228,6 @@ function GameContainer() {
       );
     }
 
-    // Reset game state
     setDormantBlocks([]);
     setScore(0);
     setElapsedTime(0);
@@ -451,6 +451,7 @@ function GameContainer() {
 
   return (
     <div className="flex gap-8">
+      <ScoresTable refreshTrigger={refreshScores} />
       <div className="border border-white margin-0-auto w-fit h-fit">
         {Array.from({ length: gridSize.y }).map((_, rowIndex) => (
           <div key={rowIndex} className="flex">
