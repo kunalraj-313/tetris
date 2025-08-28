@@ -26,7 +26,7 @@ export default function GameSettings({
   };
 
   return (
-    <div className="border border-white bg-transparent p-6 w-64 text-white font-mono">
+    <div className="border border-white bg-transparent p-6 w-fit h-fit text-white font-mono">
       <div className="border border-white bg-transparent p-3 mb-4">
         <h3 className="text-lg font-bold mb-2">SCORE</h3>
         <div className="text-2xl font-bold">{score}</div>

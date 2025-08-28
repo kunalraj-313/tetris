@@ -311,7 +311,7 @@ function GameContainer() {
 
   return (
     <div className="flex gap-8">
-      <div className="border border-white p-4 margin-0-auto w-fit h-fit">
+      <div className="border border-white margin-0-auto w-fit h-fit">
         {Array.from({ length: gridSize.y }).map((_, rowIndex) => (
           <div key={rowIndex} className="flex">
             {Array.from({ length: gridSize.x }).map((_, colIndex) => (
