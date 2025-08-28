@@ -1,7 +1,12 @@
 import { useMemo } from "react";
 import type { CellProps } from "../types/tetris";
 
-export default function Cell({ pos, currentBlock, dormantBlocks }: CellProps) {
+export default function Cell({
+  pos,
+  currentBlock,
+  dormantBlocks,
+  showGrids,
+}: CellProps) {
   const isActive = useMemo(() => {
     if (!currentBlock) return false;
     return currentBlock.shape.some(
@@ -37,7 +42,9 @@ export default function Cell({ pos, currentBlock, dormantBlocks }: CellProps) {
           ? dormantColour
           : "transparent",
       }}
-      className="w-[30px] h-[30px] text-xs"
+      className={`w-[30px] h-[30px] text-xs ${
+        showGrids ? "border border-gray-700" : ""
+      }`}
     ></div>
   );
 }

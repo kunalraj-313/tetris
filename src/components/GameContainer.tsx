@@ -30,6 +30,7 @@ function GameContainer() {
     useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [volume, setVolume] = useState<number>(0.5);
+  const [showGrids, setShowGrids] = useState<boolean>(true);
   const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
   const timerIdRef = useRef<NodeJS.Timeout | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -208,6 +209,10 @@ function GameContainer() {
     if (audioRef.current) {
       audioRef.current.volume = newVolume;
     }
+  }, []);
+
+  const toggleGrids = useCallback(() => {
+    setShowGrids((prev) => !prev);
   }, []);
 
   const playMusic = useCallback(() => {
@@ -538,6 +543,7 @@ function GameContainer() {
                 key={colIndex}
                 dormantBlocks={dormantBlocks}
                 currentBlock={currentBlock}
+                showGrids={showGrids}
                 pos={{
                   x: colIndex,
                   y: rowIndex,
@@ -554,11 +560,13 @@ function GameContainer() {
         delay={delay}
         isMuted={isMuted}
         volume={volume}
+        showGrids={showGrids}
         onStart={handleStart}
         onReset={handleReset}
         onDelayChange={handleDelayChange}
         onToggleMute={toggleMute}
         onVolumeChange={handleVolumeChange}
+        onToggleGrids={toggleGrids}
       />
     </div>
   );

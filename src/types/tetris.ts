@@ -35,4 +35,5 @@ export interface CellProps {
   pos: Position;
   currentBlock: CurrentBlock;
   dormantBlocks: TetrisBlock[];
+  showGrids: boolean;
 }

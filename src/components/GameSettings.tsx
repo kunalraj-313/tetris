@@ -5,11 +5,13 @@ interface GameSettingsProps {
   delay: number;
   isMuted: boolean;
   volume: number;
+  showGrids: boolean;
   onStart: () => void;
   onReset: () => void;
   onDelayChange: (delay: number) => void;
   onToggleMute: () => void;
   onVolumeChange: (volume: number) => void;
+  onToggleGrids: () => void;
 }
 
 export default function GameSettings({
@@ -19,11 +21,13 @@ export default function GameSettings({
   delay,
   isMuted,
   volume,
+  showGrids,
   onStart,
   onReset,
   onDelayChange,
   onToggleMute,
   onVolumeChange,
+  onToggleGrids,
 }: GameSettingsProps) {
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -104,6 +108,16 @@ export default function GameSettings({
             />
           </div>
         </div>
+      </div>
+
+      <div className="border border-white bg-transparent p-3">
+        <h3 className="text-lg font-bold mb-3">DISPLAY</h3>
+        <button
+          onClick={onToggleGrids}
+          className="w-full border border-white bg-transparent text-white px-4 py-2 hover:bg-white hover:text-black transition-colors"
+        >
+          {showGrids ? "⊞ HIDE GRIDS" : "⊟ SHOW GRIDS"}
+        </button>
       </div>
     </div>
   );
