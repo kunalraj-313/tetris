@@ -1,5 +1,6 @@
 import { memo, useEffect, useState } from "react";
 import { useSupabase } from "../hooks/useSupabase";
+import { Filter } from "bad-words";
 
 interface Score {
   id: number;
@@ -16,6 +17,7 @@ interface ScoresTableProps {
 const ScoresTable = memo(function ScoresTable({
   refreshTrigger,
 }: ScoresTableProps) {
+  const filter = new Filter();
   const { getHighScores } = useSupabase();
   const [scores, setScores] = useState<Score[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -137,27 +139,24 @@ const ScoresTable = memo(function ScoresTable({
         ) : (
           <div className="space-y-1">
             <div className="border-b border-white pb-2 mb-2">
-              <div className="grid grid-cols-4 gap-2 text-xs font-bold">
-                <div className="text-left">#</div>
-                <div className="text-left">NAME</div>
-                <div className="text-right">SCORE</div>
-                <div className="text-right">TIME</div>
+              <div className="flex text-xs font-bold">
+                <div className="w-8 text-left">#</div>
+                <div className="w-24 text-left">NAME</div>
+                <div className="flex-1 text-right">SCORE</div>
+                <div className="w-16 text-right">TIME</div>
               </div>
             </div>
 
             {scores.map((score, index) => (
-              <div
-                key={score.id}
-                className="grid grid-cols-4 gap-2 text-sm py-1"
-              >
-                <div className="text-left text-yellow-400">{index + 1}</div>
-                <div className="text-left truncate max-w-16" title={score.name}>
-                  {score.name}
+              <div key={score.id} className="flex text-sm py-1">
+                <div className="w-8 text-left text-yellow-400">{index + 1}</div>
+                <div className="w-24 text-left truncate" title={score.name}>
+                  {filter.clean(score.name)}
                 </div>
-                <div className="text-right font-bold">
+                <div className="flex-1 text-right font-bold">
                   {getTrophyEmoji(index + 1)} {score.score}
                 </div>
-                <div className="text-right text-gray-300">
+                <div className="w-16 text-right text-gray-300">
                   {formatTime(score.time_elapsed)}
                 </div>
               </div>
