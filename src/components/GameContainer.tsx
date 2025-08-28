@@ -185,14 +185,13 @@ function GameContainer() {
     }
   }, []);
 
-  // Audio control functions
   const initAudio = useCallback(() => {
     if (!audioRef.current) {
       audioRef.current = new Audio("/audio/tony-ferguson-theme.mp3");
       audioRef.current.loop = true;
-      audioRef.current.volume = 0.5; // Set initial volume to 50%
+      audioRef.current.volume = 0.5;
     }
-  }, []); // Remove volume dependency to prevent recreation
+  }, []);
 
   const toggleMute = useCallback(() => {
     setIsMuted((prev) => {
@@ -226,6 +225,57 @@ function GameContainer() {
       audioRef.current.pause();
     }
   }, []);
+
+  const clearCompletedLines = useCallback(() => {
+    const linesToClear: number[] = [];
+
+    for (let y = gridSize.y - 1; y >= 0; y--) {
+      const blocksInRow = dormantBlocks.filter((block) =>
+        block.shape.some((pos) => pos.y === y)
+      );
+
+      const uniqueXPositions = new Set(
+        blocksInRow.flatMap((block) =>
+          block.shape.filter((pos) => pos.y === y).map((pos) => pos.x)
+        )
+      );
+
+      if (uniqueXPositions.size === gridSize.x) {
+        linesToClear.push(y);
+      }
+    }
+
+    if (linesToClear.length > 0) {
+      setDormantBlocks((prev) => {
+        let updatedBlocks = [...prev];
+
+        linesToClear.forEach((lineY) => {
+          updatedBlocks = updatedBlocks
+            .map((block) => ({
+              ...block,
+              shape: block.shape.filter((pos) => pos.y !== lineY),
+            }))
+            .filter((block) => block.shape.length > 0);
+        });
+
+        linesToClear.forEach(() => {
+          updatedBlocks = updatedBlocks.map((block) => ({
+            ...block,
+            shape: block.shape.map((pos) => ({
+              ...pos,
+              y:
+                pos.y +
+                linesToClear.filter((clearedY) => clearedY > pos.y).length,
+            })),
+          }));
+        });
+
+        return updatedBlocks;
+      });
+
+      setScore((prev) => prev + linesToClear.length * 100);
+    }
+  }, [dormantBlocks, gridSize.x, gridSize.y]);
 
   const getRotatedCoordinates = useCallback(
     (block: Position, pivotPoint: Position) => {
@@ -457,7 +507,6 @@ function GameContainer() {
     };
   }, [isRunning]);
 
-  // Initialize audio on component mount
   useEffect(() => {
     initAudio();
     return () => {
@@ -468,14 +517,12 @@ function GameContainer() {
     };
   }, [initAudio]);
 
-  // Update audio volume when volume state changes
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = volume;
     }
   }, [volume]);
 
-  // Control music based on game state
   useEffect(() => {
     if (isRunning) {
       playMusic();
@@ -504,6 +551,10 @@ function GameContainer() {
       setScore((prev) => prev + 10);
     }
   }, [currentBlock, generateNewBlock, isCollided]);
+
+  useEffect(() => {
+    clearCompletedLines();
+  }, [dormantBlocks, clearCompletedLines]);
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
