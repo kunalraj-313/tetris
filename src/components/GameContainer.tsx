@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Cell from "./Cell";
 import GameSettings from "./GameSettings";
+import { useSupabase } from "../hooks/useSupabase";
 import type {
   TetrisBlock,
   GridSize,
@@ -15,14 +16,16 @@ function GameContainer() {
     y: 20,
   };
 
+  const { saveScore } = useSupabase();
+
   const [isRunning, setIsRunning] = useState<boolean>(false);
   const [currentBlock, setCurrentBlock] = useState<CurrentBlock>(null);
   const [dormantBlocks, setDormantBlocks] = useState<TetrisBlock[]>([]);
   const [score, setScore] = useState<number>(0);
   const [elapsedTime, setElapsedTime] = useState<number>(0);
   const [delay, setDelay] = useState<number>(500);
-  const intervalIdRef = useRef<number | null>(null);
-  const timerIdRef = useRef<number | null>(null);
+  const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
+  const timerIdRef = useRef<NodeJS.Timeout | null>(null);
 
   const tetrisEntityTypes: TetrisBlock[] = useMemo(
     () => [
@@ -183,6 +186,52 @@ function GameContainer() {
     },
     []
   );
+
+  const handleGameOver = useCallback(async () => {
+    setIsRunning(false);
+    setCurrentBlock(null);
+
+    // Prompt for player name
+    const playerName = prompt(
+      "Game Over! Enter your name for the leaderboard:"
+    );
+
+    if (playerName && playerName.trim()) {
+      // Save score to Supabase
+      const result = await saveScore({
+        name: playerName.trim(),
+        score: score,
+        time_elapsed: elapsedTime,
+      });
+
+      if (result.success) {
+        alert(
+          `Score saved! Final Score: ${score}, Time: ${Math.floor(
+            elapsedTime / 60
+          )}:${(elapsedTime % 60).toString().padStart(2, "0")}`
+        );
+      } else {
+        alert(
+          `Game Over! Final Score: ${score}, Time: ${Math.floor(
+            elapsedTime / 60
+          )}:${(elapsedTime % 60)
+            .toString()
+            .padStart(2, "0")}\n(Score could not be saved to leaderboard)`
+        );
+      }
+    } else {
+      alert(
+        `Game Over! Final Score: ${score}, Time: ${Math.floor(
+          elapsedTime / 60
+        )}:${(elapsedTime % 60).toString().padStart(2, "0")}`
+      );
+    }
+
+    // Reset game state
+    setDormantBlocks([]);
+    setScore(0);
+    setElapsedTime(0);
+  }, [saveScore, score, elapsedTime]);
 
   const handleDelayChange = useCallback(
     (newDelay: number) => {
@@ -396,12 +445,9 @@ function GameContainer() {
 
   useEffect(() => {
     if (dormantBlocks.some((block) => block.shape.some((pos) => pos.y < 0))) {
-      alert("Game Over");
-      setIsRunning(false);
-      setCurrentBlock(null);
-      setDormantBlocks([]);
+      handleGameOver();
     }
-  }, [dormantBlocks]);
+  }, [dormantBlocks, handleGameOver]);
 
   return (
     <div className="flex gap-8">
