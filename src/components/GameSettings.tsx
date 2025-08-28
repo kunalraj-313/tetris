@@ -78,7 +78,9 @@ export default function GameSettings({
         <div className="border border-white bg-transparent p-2 flex-1 min-w-[140px]">
           <h3 className="text-lg font-bold mb-2">LEVEL</h3>
           <div className="text-2xl font-bold">{level}</div>
-          <div className="text-xs text-gray-300">Speed increases every 100 points</div>
+          <div className="text-xs text-gray-300">
+            Speed increases every 100 points
+          </div>
         </div>
 
         <div className="border border-white bg-transparent p-2 flex-1 min-w-[140px]">
