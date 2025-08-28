@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Cell from "./Cell";
+import GameSettings from "./GameSettings";
 import type {
   TetrisBlock,
   GridSize,
@@ -13,10 +14,14 @@ function GameContainer() {
     y: 20,
   };
 
-  const [isRunning, setIsRunning] = useState<boolean>(true);
+  const [isRunning, setIsRunning] = useState<boolean>(false);
   const [currentBlock, setCurrentBlock] = useState<CurrentBlock>(null);
   const [dormantBlocks, setDormantBlocks] = useState<TetrisBlock[]>([]);
+  const [score, setScore] = useState<number>(0);
+  const [elapsedTime, setElapsedTime] = useState<number>(0);
+  const [delay, setDelay] = useState<number>(500);
   const intervalIdRef = useRef<number | null>(null);
+  const timerIdRef = useRef<number | null>(null);
 
   const tetrisEntityTypes: TetrisBlock[] = useMemo(
     () => [
@@ -143,8 +148,58 @@ function GameContainer() {
           })),
         };
       });
-    }, 200);
-  }, [currentBlock, generateNewBlock]);
+    }, delay);
+  }, [currentBlock, generateNewBlock, delay]);
+
+  const handleStart = useCallback(() => {
+    setIsRunning(!isRunning);
+  }, [isRunning]);
+
+  const handleReset = useCallback(() => {
+    setIsRunning(false);
+    setCurrentBlock(null);
+    setDormantBlocks([]);
+    setScore(0);
+    setElapsedTime(0);
+    if (intervalIdRef.current) {
+      clearInterval(intervalIdRef.current);
+      intervalIdRef.current = null;
+    }
+    if (timerIdRef.current) {
+      clearInterval(timerIdRef.current);
+      timerIdRef.current = null;
+    }
+  }, []);
+
+  const handleDelayChange = useCallback(
+    (newDelay: number) => {
+      setDelay(newDelay);
+      if (isRunning && intervalIdRef.current) {
+        clearInterval(intervalIdRef.current);
+        intervalIdRef.current = null;
+      }
+    },
+    [isRunning]
+  );
+
+  useEffect(() => {
+    if (isRunning) {
+      timerIdRef.current = setInterval(() => {
+        setElapsedTime((prev) => prev + 1);
+      }, 1000);
+    } else {
+      if (timerIdRef.current) {
+        clearInterval(timerIdRef.current);
+        timerIdRef.current = null;
+      }
+    }
+
+    return () => {
+      if (timerIdRef.current) {
+        clearInterval(timerIdRef.current);
+      }
+    };
+  }, [isRunning]);
 
   useEffect(() => {
     if (isRunning) {
@@ -163,6 +218,7 @@ function GameContainer() {
       setDormantBlocks((prev) => [...prev, currentBlock]);
       setCurrentBlock(null);
       generateNewBlock();
+      setScore((prev) => prev + 10);
     }
   }, [currentBlock, generateNewBlock, isCollided]);
 
@@ -254,22 +310,33 @@ function GameContainer() {
   }, [dormantBlocks]);
 
   return (
-    <div className="border border-white p-4 margin-0-auto w-fit h-fit">
-      {Array.from({ length: gridSize.y }).map((_, rowIndex) => (
-        <div key={rowIndex} className="flex">
-          {Array.from({ length: gridSize.x }).map((_, colIndex) => (
-            <Cell
-              key={colIndex}
-              dormantBlocks={dormantBlocks}
-              currentBlock={currentBlock}
-              pos={{
-                x: colIndex,
-                y: rowIndex,
-              }}
-            />
-          ))}
-        </div>
-      ))}
+    <div className="flex gap-8">
+      <div className="border border-white p-4 margin-0-auto w-fit h-fit">
+        {Array.from({ length: gridSize.y }).map((_, rowIndex) => (
+          <div key={rowIndex} className="flex">
+            {Array.from({ length: gridSize.x }).map((_, colIndex) => (
+              <Cell
+                key={colIndex}
+                dormantBlocks={dormantBlocks}
+                currentBlock={currentBlock}
+                pos={{
+                  x: colIndex,
+                  y: rowIndex,
+                }}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+      <GameSettings
+        isRunning={isRunning}
+        score={score}
+        elapsedTime={elapsedTime}
+        delay={delay}
+        onStart={handleStart}
+        onReset={handleReset}
+        onDelayChange={handleDelayChange}
+      />
     </div>
   );
 }
