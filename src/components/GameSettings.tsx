@@ -8,6 +8,7 @@ interface GameSettingsProps {
   showGrids: boolean;
   onStart: () => void;
   onReset: () => void;
+  onQuit: () => void;
   onDelayChange: (delay: number) => void;
   onToggleMute: () => void;
   onVolumeChange: (volume: number) => void;
@@ -24,6 +25,7 @@ export default function GameSettings({
   showGrids,
   onStart,
   onReset,
+  onQuit,
   onDelayChange,
   onToggleMute,
   onVolumeChange,
@@ -64,6 +66,13 @@ export default function GameSettings({
               className="w-full border border-white bg-transparent text-white px-3 py-2 hover:bg-white hover:text-black transition-colors text-sm"
             >
               RESET
+            </button>
+            <button
+              onClick={onQuit}
+              className="w-full border border-white bg-transparent text-white px-3 py-2 hover:bg-white hover:text-black transition-colors text-sm"
+              disabled={!isRunning && score === 0}
+            >
+              QUIT & SAVE
             </button>
           </div>
         </div>

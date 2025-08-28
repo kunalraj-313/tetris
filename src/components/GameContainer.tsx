@@ -185,6 +185,49 @@ function GameContainer() {
     }
   }, []);
 
+  const handleQuit = useCallback(async () => {
+    if (score === 0) return; // Don't save if no score
+
+    setIsRunning(false);
+    setCurrentBlock(null);
+
+    const playerName = prompt(
+      "Save your progress! Enter your name for the leaderboard:"
+    );
+
+    if (playerName && playerName.trim()) {
+      setIsGameOverProcessing(true);
+
+      const result = await saveScore({
+        name: playerName.trim(),
+        score: score,
+        time_elapsed: elapsedTime,
+      });
+
+      setIsGameOverProcessing(false);
+
+      if (result.success) {
+        alert(
+          `Score saved! Final Score: ${score}, Time: ${Math.floor(
+            elapsedTime / 60
+          )}:${(elapsedTime % 60).toString().padStart(2, "0")}`
+        );
+        setRefreshScores((prev) => prev + 1);
+      } else {
+        alert(
+          `Score could not be saved to leaderboard. Final Score: ${score}, Time: ${Math.floor(
+            elapsedTime / 60
+          )}:${(elapsedTime % 60).toString().padStart(2, "0")}`
+        );
+      }
+    }
+
+    setDormantBlocks([]);
+    setScore(0);
+    setElapsedTime(0);
+    setIsGameOverProcessing(false);
+  }, [saveScore, score, elapsedTime]);
+
   const initAudio = useCallback(() => {
     if (!audioRef.current) {
       audioRef.current = new Audio("/audio/tony-ferguson-theme.mp3");
@@ -614,6 +657,7 @@ function GameContainer() {
         showGrids={showGrids}
         onStart={handleStart}
         onReset={handleReset}
+        onQuit={handleQuit}
         onDelayChange={handleDelayChange}
         onToggleMute={toggleMute}
         onVolumeChange={handleVolumeChange}
