@@ -6,15 +6,15 @@ interface NextBlockProps {
 }
 
 const NextBlock = memo(function NextBlock({ nextBlock }: NextBlockProps) {
-  const gridSize = { x: 4, y: 6 };
+  const gridSize = { x: 6, y: 6 };
 
   const isBlockAtPosition = (x: number, y: number): boolean => {
     if (!nextBlock) return false;
 
     return nextBlock.shape.some((pos) => {
-      const adjustedX = pos.x - 2.5;
+      const adjustedX = pos.x - 2;
       const adjustedY = pos.y + 5;
-      return Math.round(adjustedX) === x && adjustedY === y;
+      return adjustedX === x && adjustedY === y;
     });
   };
 
@@ -24,7 +24,7 @@ const NextBlock = memo(function NextBlock({ nextBlock }: NextBlockProps) {
   };
 
   return (
-    <div className="border border-white bg-transparent p-4 mb-4 min-w-[150px]">
+    <div className="border border-white bg-transparent p-4 mb-4 min-w-[180px]">
       <h3 className="text-white font-mono text-sm font-bold mb-3 text-center">
         NEXT
       </h3>
