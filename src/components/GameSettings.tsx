@@ -2,14 +2,13 @@ interface GameSettingsProps {
   isRunning: boolean;
   score: number;
   elapsedTime: number;
-  delay: number;
+  level: number;
   isMuted: boolean;
   volume: number;
   showGrids: boolean;
   onStart: () => void;
   onReset: () => void;
   onQuit: () => void;
-  onDelayChange: (delay: number) => void;
   onToggleMute: () => void;
   onVolumeChange: (volume: number) => void;
   onToggleGrids: () => void;
@@ -19,14 +18,13 @@ export default function GameSettings({
   isRunning,
   score,
   elapsedTime,
-  delay,
+  level,
   isMuted,
   volume,
   showGrids,
   onStart,
   onReset,
   onQuit,
-  onDelayChange,
   onToggleMute,
   onVolumeChange,
   onToggleGrids,
@@ -78,20 +76,9 @@ export default function GameSettings({
         </div>
 
         <div className="border border-white bg-transparent p-2 flex-1 min-w-[140px]">
-          <h3 className="text-lg font-bold mb-2">SPEED</h3>
-          <div className="mb-2">
-            <label className="block text-xs mb-1">Delay: {delay}ms</label>
-            <input
-              type="range"
-              min="50"
-              max="1000"
-              step="50"
-              value={delay}
-              onChange={(e) => onDelayChange(Number(e.target.value))}
-              className="w-full bg-transparent border border-white accent-white"
-            />
-          </div>
-          <div className="text-xs text-gray-300">Lower = Faster</div>
+          <h3 className="text-lg font-bold mb-2">LEVEL</h3>
+          <div className="text-2xl font-bold">{level}</div>
+          <div className="text-xs text-gray-300">Speed increases every 100 points</div>
         </div>
 
         <div className="border border-white bg-transparent p-2 flex-1 min-w-[140px]">

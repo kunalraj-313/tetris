@@ -26,7 +26,7 @@ function GameContainer() {
   const [dormantBlocks, setDormantBlocks] = useState<TetrisBlock[]>([]);
   const [score, setScore] = useState<number>(0);
   const [elapsedTime, setElapsedTime] = useState<number>(0);
-  const [delay, setDelay] = useState<number>(500);
+  const [level, setLevel] = useState<number>(1);
   const [refreshScores, setRefreshScores] = useState<number>(0);
   const [isGameOverProcessing, setIsGameOverProcessing] =
     useState<boolean>(false);
@@ -152,6 +152,10 @@ function GameContainer() {
     }
   }, [nextBlock, tetrisEntityTypes]);
 
+  const getDelay = useCallback(() => {
+    return Math.max(500 - (level - 1) * 50, 50);
+  }, [level]);
+
   const initGame = useCallback(() => {
     if (!currentBlock) {
       generateNewBlock();
@@ -160,7 +164,6 @@ function GameContainer() {
     intervalIdRef.current = setInterval(() => {
       setCurrentBlock((prev) => {
         if (!prev) return prev;
-
         return {
           ...prev,
           shape: prev.shape.map((pos) => ({
@@ -170,8 +173,8 @@ function GameContainer() {
           })),
         };
       });
-    }, delay);
-  }, [currentBlock, generateNewBlock, delay]);
+    }, getDelay());
+  }, [currentBlock, generateNewBlock, getDelay]);
 
   const handleStart = useCallback(() => {
     setIsRunning(!isRunning);
@@ -391,17 +394,6 @@ function GameContainer() {
     setIsGameOverProcessing(false);
   }, [saveScore, score, elapsedTime, isGameOverProcessing]);
 
-  const handleDelayChange = useCallback(
-    (newDelay: number) => {
-      setDelay(newDelay);
-      if (isRunning && intervalIdRef.current) {
-        clearInterval(intervalIdRef.current);
-        intervalIdRef.current = null;
-      }
-    },
-    [isRunning]
-  );
-
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (!currentBlock) return;
@@ -605,7 +597,7 @@ function GameContainer() {
         clearInterval(intervalIdRef.current);
       }
     };
-  }, [initGame, isRunning]);
+  }, [initGame, isRunning, level]);
 
   useEffect(() => {
     if (isCollided && currentBlock) {
@@ -618,7 +610,8 @@ function GameContainer() {
 
   useEffect(() => {
     clearCompletedLines();
-  }, [dormantBlocks, clearCompletedLines]);
+    setLevel(Math.min(Math.floor(score / 100) + 1, 10));
+  }, [dormantBlocks, clearCompletedLines, score]);
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
@@ -693,14 +686,13 @@ function GameContainer() {
           isRunning={isRunning}
           score={score}
           elapsedTime={elapsedTime}
-          delay={delay}
+          level={level}
           isMuted={isMuted}
           volume={volume}
           showGrids={showGrids}
           onStart={handleStart}
           onReset={handleReset}
           onQuit={handleQuit}
-          onDelayChange={handleDelayChange}
           onToggleMute={toggleMute}
           onVolumeChange={handleVolumeChange}
           onToggleGrids={toggleGrids}
