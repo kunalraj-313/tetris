@@ -3,7 +3,7 @@ import GameContainer from "./components/GameContainer";
 
 function App() {
   return (
-    <div className="min-h-screen w-full flex justify-center bg-blue-500 pt-[50px]">
+    <div className="min-h-screen w-full flex justify-center bg-black pt-[50px]">
       <GameContainer />
     </div>
   );

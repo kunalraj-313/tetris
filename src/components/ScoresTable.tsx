@@ -35,6 +35,19 @@ const ScoresTable = memo(function ScoresTable({
       .padStart(2, "0")}`;
   };
 
+  const getTrophyEmoji = (position: number): string => {
+    switch (position) {
+      case 1:
+        return "🏆";
+      case 2:
+        return "🥈";
+      case 3:
+        return "🥉";
+      default:
+        return "";
+    }
+  };
+
   const fetchScores = async () => {
     const now = Date.now();
 
@@ -87,7 +100,7 @@ const ScoresTable = memo(function ScoresTable({
   }, [refreshTrigger, lastRefreshTrigger]);
 
   return (
-    <div className="border border-white bg-transparent p-6 w-fit h-fit text-white font-mono">
+    <div className="border border-white bg-transparent p-6 min-w-[400px] h-fit text-white font-mono">
       <div className="border border-white bg-transparent p-3 mb-4">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-lg font-bold">HIGH SCORES</h3>
@@ -135,13 +148,15 @@ const ScoresTable = memo(function ScoresTable({
             {scores.map((score, index) => (
               <div
                 key={score.id}
-                className="grid grid-cols-4 gap-2 text-sm py-1 hover:bg-white hover:bg-opacity-10 transition-colors"
+                className="grid grid-cols-4 gap-2 text-sm py-1"
               >
                 <div className="text-left text-yellow-400">{index + 1}</div>
                 <div className="text-left truncate max-w-16" title={score.name}>
                   {score.name}
                 </div>
-                <div className="text-right font-bold">{score.score}</div>
+                <div className="text-right font-bold">
+                  {getTrophyEmoji(index + 1)} {score.score}
+                </div>
                 <div className="text-right text-gray-300">
                   {formatTime(score.time_elapsed)}
                 </div>
