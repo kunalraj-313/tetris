@@ -26,6 +26,8 @@ function GameContainer() {
   const [elapsedTime, setElapsedTime] = useState<number>(0);
   const [delay, setDelay] = useState<number>(500);
   const [refreshScores, setRefreshScores] = useState<number>(0);
+  const [isGameOverProcessing, setIsGameOverProcessing] =
+    useState<boolean>(false);
   const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
   const timerIdRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -168,6 +170,7 @@ function GameContainer() {
     setDormantBlocks([]);
     setScore(0);
     setElapsedTime(0);
+    setIsGameOverProcessing(false);
     if (intervalIdRef.current) {
       clearInterval(intervalIdRef.current);
       intervalIdRef.current = null;
@@ -190,6 +193,9 @@ function GameContainer() {
   );
 
   const handleGameOver = useCallback(async () => {
+    if (isGameOverProcessing) return;
+
+    setIsGameOverProcessing(true);
     setIsRunning(false);
     setCurrentBlock(null);
 
@@ -231,7 +237,8 @@ function GameContainer() {
     setDormantBlocks([]);
     setScore(0);
     setElapsedTime(0);
-  }, [saveScore, score, elapsedTime]);
+    setIsGameOverProcessing(false);
+  }, [saveScore, score, elapsedTime, isGameOverProcessing]);
 
   const handleDelayChange = useCallback(
     (newDelay: number) => {
@@ -444,10 +451,13 @@ function GameContainer() {
   // }, [handleKeyDown, keysHeld]);
 
   useEffect(() => {
-    if (dormantBlocks.some((block) => block.shape.some((pos) => pos.y < 0))) {
+    if (
+      !isGameOverProcessing &&
+      dormantBlocks.some((block) => block.shape.some((pos) => pos.y < 0))
+    ) {
       handleGameOver();
     }
-  }, [dormantBlocks, handleGameOver]);
+  }, [dormantBlocks, handleGameOver, isGameOverProcessing]);
 
   return (
     <div className="flex gap-8">
